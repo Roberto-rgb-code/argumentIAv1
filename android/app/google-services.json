@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "221712438995",
+    "project_id": "argumentia-68101",
+    "storage_bucket": "argumentia-68101.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:221712438995:android:820a7438c3739022912626",
+        "android_client_info": {
+          "package_name": "com.example.argumenta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvuU3lvI1eEwvtsGtI58A3nFCnXsiNVbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

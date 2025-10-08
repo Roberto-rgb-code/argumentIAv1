@@ -1,0 +1,36 @@
+{
+  "habilidad_id": "U4_Criterios_Eficacia",
+  "titulo": "Criterios: Eficacia",
+  "descripcion": "Evalúa si la política produce el efecto deseado.",
+  "tipo": "politica/criterio",
+  "lecciones": [
+    {
+      "leccion_id": "L1_definicion",
+      "objetivo": "Distinguir eficacia de eficiencia y reconocer evidencia adecuada.",
+      "items": [
+        {
+          "item_id": "I1_mcq",
+          "tipo_item": "opcion_multiple",
+          "pregunta": "¿Qué mide la eficacia?",
+          "opciones": ["Uso de recursos", "Logro del efecto deseado", "Aceptación política"],
+          "respuesta_correcta": 1,
+          "explicacion": "Eficacia = efecto; Eficiencia = efecto / recursos."
+        },
+        {
+          "item_id": "I2_ordenar",
+          "tipo_item": "ordenar",
+          "pregunta": "Ordena los pasos para evaluar eficacia en un caso corto",
+          "ordenar": ["Definir efecto esperado", "Recolectar evidencia", "Comparar con línea base", "Concluir"],
+          "orden_correcto": [0, 1, 2, 3]
+        },
+        {
+          "item_id": "I3_free",
+          "tipo_item": "respuesta_corta",
+          "pregunta": "Escribe en ≤20 palabras qué evidencia probaría eficacia de 'cobro congestionado' en movilidad.",
+          "respuesta_texto": "reducción de tiempos de viaje",
+          "explicacion": "Busca efecto directo en la variable objetivo (tiempo/flujo)."
+        }
+      ]
+    }
+  ]
+}

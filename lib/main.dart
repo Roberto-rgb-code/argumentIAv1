@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'theme.dart';
 
-// Usa alias para evitar colisiones de nombres
+// Páginas existentes
 import 'pages/home_page.dart' as home;
 import 'pages/chatbot/chatbot_page.dart' as chat;
 import 'pages/forums/forums_page.dart' as forums;
 import 'pages/events/events_page.dart' as events;
 import 'pages/tokens/tokens_page.dart' as tokens;
 
-void main() {
+// Nuevo: compuerta de autenticación
+import 'pages/auth/auth_gate.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   Animate.restartOnHotReload = true;
   runApp(const ArgumentaApp());
 }
@@ -24,7 +33,8 @@ class ArgumentaApp extends StatelessWidget {
       title: 'Argumenta',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: const _Shell(),
+      // Muestra login/registro si no hay sesión; si hay sesión, muestra tu shell.
+      home: const AuthGate(shell: _Shell()),
     );
   }
 }
@@ -38,13 +48,12 @@ class _Shell extends StatefulWidget {
 class _ShellState extends State<_Shell> {
   int _index = 0;
 
-  // 👇 NO uses `const [...]` en la lista; pon `const` en cada widget que lo soporte.
-  late final List<Widget> _tabs = <Widget>[
-    const home.HomePage(),
-    const chat.ChatbotPage(),
-    const forums.ForumsPage(),
-    const events.EventsPage(),
-    const tokens.TokensPage(),
+  late final List<Widget> _tabs = const <Widget>[
+    home.HomePage(),
+    chat.ChatbotPage(),
+    forums.ForumsPage(),
+    events.EventsPage(),
+    tokens.TokensPage(),
   ];
 
   @override
