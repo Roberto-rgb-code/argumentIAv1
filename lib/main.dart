@@ -10,6 +10,7 @@ import 'pages/home_page.dart' as home;
 import 'pages/chatbot/chatbot_page.dart' as chat;
 import 'pages/forums/forums_page.dart' as forums;
 import 'pages/events/events_page.dart' as events;
+import 'pages/lessons/lessons_page.dart' as lessons;
 import 'pages/profile/profile_page.dart' as profile;
 
 // Nuevo: compuerta de autenticación
@@ -53,6 +54,7 @@ class _ShellState extends State<_Shell> {
     chat.ChatbotPage(),
     forums.ForumsPage(),
     events.EventsPage(),
+    lessons.LessonsPage(),
     profile.ProfilePage(),
   ];
 
@@ -82,6 +84,7 @@ class _ShellState extends State<_Shell> {
           NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: 'Chatbot'),
           NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: 'Foros'),
           NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: 'Eventos'),
+          NavigationDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: 'Lecciones'),
           NavigationDestination(icon: Icon(Icons.person_outlined), selectedIcon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),
