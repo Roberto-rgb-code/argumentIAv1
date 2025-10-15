@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'firebase_options.dart';
 
-import 'theme.dart';
+import 'theme/app_theme.dart';
 
 // Páginas existentes
 import 'pages/home_page.dart' as home;
@@ -30,12 +31,19 @@ class ArgumentaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Argumenta',
-      debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
-      // Muestra login/registro si no hay sesión; si hay sesión, muestra tu shell.
-      home: const AuthGate(shell: _Shell()),
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Dialecta',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          // Muestra login/registro si no hay sesión; si hay sesión, muestra tu shell.
+          home: const AuthGate(shell: _Shell()),
+        );
+      },
     );
   }
 }
@@ -80,12 +88,36 @@ class _ShellState extends State<_Shell> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Inicio'),
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: 'Chatbot'),
-          NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: 'Foros'),
-          NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: 'Eventos'),
-          NavigationDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: 'Lecciones'),
-          NavigationDestination(icon: Icon(Icons.person_outlined), selectedIcon: Icon(Icons.person), label: 'Perfil'),
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined), 
+            selectedIcon: Icon(Icons.home), 
+            label: 'Inicio'
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline), 
+            selectedIcon: Icon(Icons.chat_bubble), 
+            label: 'Debate'
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.forum_outlined), 
+            selectedIcon: Icon(Icons.forum), 
+            label: 'Foros'
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_outlined), 
+            selectedIcon: Icon(Icons.event), 
+            label: 'Eventos'
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.school_outlined), 
+            selectedIcon: Icon(Icons.school), 
+            label: 'Lecciones'
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outlined), 
+            selectedIcon: Icon(Icons.person), 
+            label: 'Perfil'
+          ),
         ],
       ),
     );
