@@ -320,6 +320,7 @@ class _ButtonStyle {
 // Botón especial para debates
 class DialectaDebateButton extends StatelessWidget {
   final String text;
+  final String? subtitle;
   final VoidCallback? onPressed;
   final bool isPro;
   final bool isSelected;
@@ -328,6 +329,7 @@ class DialectaDebateButton extends StatelessWidget {
   const DialectaDebateButton({
     super.key,
     required this.text,
+    this.subtitle,
     this.onPressed,
     required this.isPro,
     this.isSelected = false,
@@ -377,6 +379,17 @@ class DialectaDebateButton extends StatelessWidget {
                 fontSize: 14,
               ),
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle!,
+                style: TextStyle(
+                  color: AppTheme.charcoalBlack.withOpacity(0.6),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ],
         ),
       ),
