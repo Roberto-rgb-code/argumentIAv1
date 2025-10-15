@@ -243,7 +243,7 @@ class _CreateDebatePageState extends State<CreateDebatePage> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: TextFormField(
+                      child: TextField(
                         controller: _tagController,
                         decoration: InputDecoration(
                           hintText: 'Escribe una etiqueta y presiona Enter',

@@ -210,7 +210,7 @@ class AppTheme {
       ),
 
       // Cards
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
@@ -328,7 +328,7 @@ class AppTheme {
       ),
 
       // Tab Bar
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: primaryBlue,
         unselectedLabelColor: charcoalBlack.withOpacity(0.6),
         indicator: UnderlineTabIndicator(
@@ -367,7 +367,7 @@ class AppTheme {
       ),
 
       // Dialog
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: Colors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(

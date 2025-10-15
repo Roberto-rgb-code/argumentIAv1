@@ -481,7 +481,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
       case 'primerlugar':
         return Icons.emoji_events_rounded;
       case 'segundolugar':
-        return Icons.medal_rounded;
+        return Icons.military_tech_rounded;
       case 'tercerlugar':
         return Icons.military_tech_rounded;
       default:

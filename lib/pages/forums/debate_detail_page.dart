@@ -179,7 +179,7 @@ class _DebateDetailPageState extends State<DebateDetailPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        Icons.megaphone_rounded,
+                        Icons.campaign_rounded,
                         color: const Color(0xFF6C5CE7),
                         size: 20,
                       ),

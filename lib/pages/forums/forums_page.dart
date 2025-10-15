@@ -29,6 +29,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
       authorId: 'user1',
       authorName: 'Ana García',
       tags: ['IA', 'tecnología', 'futuro'],
+      isActive: true,
     ),
     DebateTopic(
       id: '2',
@@ -41,6 +42,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
       authorId: 'user2',
       authorName: 'Carlos López',
       tags: ['clima', 'sostenibilidad', 'medio ambiente'],
+      isActive: true,
     ),
     DebateTopic(
       id: '3',
@@ -53,6 +55,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
       authorId: 'user3',
       authorName: 'María Rodríguez',
       tags: ['educación', 'tecnología', 'aprendizaje'],
+      isActive: true,
     ),
     DebateTopic(
       id: '4',
@@ -65,6 +68,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
       authorId: 'user4',
       authorName: 'José Martínez',
       tags: ['economía', 'globalización', 'comercio'],
+      isActive: true,
     ),
     DebateTopic(
       id: '5',
@@ -77,6 +81,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
       authorId: 'user5',
       authorName: 'Laura Sánchez',
       tags: ['energía', 'nuclear', 'sostenibilidad'],
+      isActive: true,
     ),
     DebateTopic(
       id: '6',
@@ -89,6 +94,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
       authorId: 'user6',
       authorName: 'Roberto Díaz',
       tags: ['espacio', 'ciencia', 'recursos'],
+      isActive: true,
     ),
   ];
 
@@ -333,7 +339,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    Icons.megaphone_rounded,
+                    Icons.campaign_rounded,
                     color: const Color(0xFF6C5CE7),
                     size: 20,
                   ),
