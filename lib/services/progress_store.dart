@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'user_stats_service.dart';
 
 class ProgressStore {
   static const _kPrefix = 'arg_progress_';
@@ -11,5 +12,14 @@ class ProgressStore {
   Future<void> setProgress(String leccionId, double value) async {
     final p = await SharedPreferences.getInstance();
     await p.setDouble('$_kPrefix$leccionId', value.clamp(0.0, 1.0));
+    
+    // Si completó la lección (progreso = 1.0), otorgar recompensas
+    if (value >= 1.0) {
+      final wasCompleted = await p.getBool('${_kPrefix}${leccionId}_completed') ?? false;
+      if (!wasCompleted) {
+        await UserStatsService.instance.rewardLessonCompleted();
+        await p.setBool('${_kPrefix}${leccionId}_completed', true);
+      }
+    }
   }
 }

@@ -1,305 +1,446 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-class ChatbotPage extends StatelessWidget {
+import '../../models/chat_models.dart';
+import '../../services/xai_service.dart';
+import '../../services/user_stats_service.dart';
+import '../../widgets/message_bubble.dart';
+
+class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Chatbot de Debate'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.chat_rounded), text: 'Debate'),
-              Tab(icon: Icon(Icons.history_rounded), text: 'Historial'),
-            ],
-          ),
-        ),
-        body: const TabBarView(
-          children: [
-            _DebateTab(),
-            _HistorialTab(),
-          ],
-        ),
-      ),
-    );
-  }
+  State<ChatbotPage> createState() => _ChatbotPageState();
 }
 
-class _DebateTab extends StatefulWidget {
-  const _DebateTab();
+class _ChatbotPageState extends State<ChatbotPage> {
+  final _xaiService = XAIService.instance;
+  final _statsService = UserStatsService.instance;
+  final _controller = TextEditingController();
+  final _scrollController = ScrollController();
 
-  @override
-  State<_DebateTab> createState() => _DebateTabState();
-}
-
-class _DebateTabState extends State<_DebateTab> {
   final _topics = const [
     'Renta básica universal',
     'Prohibición de apps corta-videos en escuelas',
     'Impuesto a la riqueza',
+    'Energía nuclear vs renovables',
+    'Regulación de IA',
   ];
 
-  String _selected = 'Renta básica universal';
-  int _seconds = 60;
-  Timer? _timer;
-  bool _running = false;
-  int _turn = 1; // 1 = Tú, 2 = IA
+  String _selectedTopic = 'Renta básica universal';
+  List<ChatMessage> _messages = [];
+  bool _isTyping = false;
+  bool _debateStarted = false;
+  int _turnCount = 0;
 
-  void _start() {
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _startDebate() async {
     setState(() {
-      _seconds = 60;
-      _running = true;
-      _turn = 1;
+      _isTyping = true;
+      _messages = [];
+      _debateStarted = true;
+      _turnCount = 0;
     });
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) return;
-      if (_seconds == 0) {
-        setState(() {
-          _running = false;
-          _turn = _turn == 1 ? 2 : 1;
-        });
-        t.cancel();
-      } else {
-        setState(() => _seconds--);
+
+    try {
+      final opening = await _xaiService.startDebate(_selectedTopic);
+      final message = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        role: MessageRole.assistant,
+        content: opening,
+        timestamp: DateTime.now(),
+      );
+
+      setState(() {
+        _messages.add(message);
+        _turnCount++;
+        _isTyping = false;
+      });
+
+      _scrollToBottom();
+    } catch (e) {
+      setState(() => _isTyping = false);
+      _showError('Error al iniciar debate: $e');
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    // Agregar mensaje del usuario
+    final userMessage = ChatMessage(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      role: MessageRole.user,
+      content: text,
+      timestamp: DateTime.now(),
+    );
+
+    setState(() {
+      _messages.add(userMessage);
+      _isTyping = true;
+      _turnCount++;
+    });
+
+    _controller.clear();
+    _scrollToBottom();
+
+    try {
+      // Obtener respuesta de la IA
+      final response = await _xaiService.sendMessage(
+        messages: _messages,
+        topic: _selectedTopic,
+      );
+
+      setState(() {
+        _messages.add(response);
+        _isTyping = false;
+      });
+
+      _scrollToBottom();
+
+      // Si llegó a 5 turnos del usuario, terminar debate
+      final userTurns = _messages.where((m) => m.role == MessageRole.user).length;
+      if (userTurns >= 5) {
+        _showDebateCompleted();
+      }
+    } catch (e) {
+      setState(() => _isTyping = false);
+      _showError('Error: $e');
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
     });
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-      child: Column(
-        children: [
-          // Selección de tema
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Icon(Icons.topic_rounded),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _selected,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(borderSide: BorderSide.none),
-                        labelText: 'Tema de debate',
-                      ),
-                      items: _topics.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                      onChanged: _running ? null : (v) => setState(() => _selected = v!),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-              .animate()
-              .fadeIn(duration: 250.ms)
-              .slide(begin: const Offset(0, .05), curve: Curves.easeOut),
-
-          const SizedBox(height: 12),
-
-          // Temporizador circular + turno
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  _TimerRing(seconds: _seconds, active: _running),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Turno: ${_turn == 1 ? "Tú" : "IA"}',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 6),
-                        Text(
-                          _running ? 'Habla con argumentos claros en 60s' : 'Pulsa “Empezar turno”',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  FilledButton.icon(
-                    onPressed: _running ? null : _start,
-                    icon: const Icon(Icons.timer_rounded),
-                    label: Text(_running ? 'En curso' : 'Empezar turno'),
-                  ),
-                ],
-              ),
-            ),
-          )
-              .animate()
-              .fadeIn(duration: 280.ms)
-              .slide(begin: const Offset(0, .04), curve: Curves.easeOut),
-
-          const SizedBox(height: 12),
-
-          // Área de mensajes (placeholder)
-          Expanded(
-            child: ListView(
-              children: [
-                _Bubble.me('Mi postura inicial es…'),
-                _Bubble.ai('Gracias. Considera también el costo de oportunidad…'),
-                if (_running)
-                  const _Hint('Consejo: estructura AREL (Afirmación, Razón, Evidencia, Limitaciones)')
-                      .animate()
-                      .fadeIn(duration: 300.ms),
-              ],
-            ),
-          ),
-        ],
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: const Color(0xFFFF6B6B),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
-}
 
-class _TimerRing extends StatelessWidget {
-  final int seconds;
-  final bool active;
-  const _TimerRing({required this.seconds, required this.active});
+  Future<void> _showDebateCompleted() async {
+    // Otorgar recompensas
+    await _statsService.rewardDebateCompleted(score: 70);
 
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final value = seconds / 60.0;
+    if (!mounted) return;
 
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        SizedBox(
-          width: 78,
-          height: 78,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: value, end: value),
-            duration: 400.ms,
-            builder: (context, v, _) {
-              return CircularProgressIndicator(
-                value: v,
-                strokeWidth: 8,
-                color: cs.primary,
-                backgroundColor: cs.primary.withOpacity(.15),
-              );
-            },
-          ),
-        ),
-        AnimatedSwitcher(
-          duration: 250.ms,
-          transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
-          child: Text(
-            '$seconds',
-            key: ValueKey(seconds),
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Bubble extends StatelessWidget {
-  final String text;
-  final bool isMe;
-  final IconData avatar;
-
-  const _Bubble._(this.text, this.isMe, this.avatar);
-
-  factory _Bubble.me(String t) => _Bubble._(t, true, Icons.person);
-  factory _Bubble.ai(String t) => _Bubble._(t, false, Icons.smart_toy_rounded);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        constraints: const BoxConstraints(maxWidth: 320),
-        decoration: BoxDecoration(
-          color: isMe ? cs.primary : cs.surface,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
           children: [
-            if (!isMe) Icon(avatar, size: 16, color: isMe ? Colors.white : cs.onSurfaceVariant),
-            if (!isMe) const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                text,
-                style: TextStyle(color: isMe ? Colors.white : cs.onSurface),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6C5CE7), Color(0xFF00B4DB)],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.emoji_events, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              '¡Debate completado!',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Has participado en 5 turnos de debate.',
+              style: TextStyle(fontSize: 15),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFD93D), Color(0xFFFF6B6B)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: const [
+                  Text(
+                    '🎉 Recompensas obtenidas',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    '• +12 Tokens\n• +45 XP\n• Racha actualizada',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                _messages = [];
+                _debateStarted = false;
+                _turnCount = 0;
+              });
+            },
+            child: const Text('Nuevo debate'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
       ),
-    ).animate().fadeIn(duration: 200.ms).move(begin: Offset(isMe ? 10 : -10, 0));
+    );
   }
-}
-
-class _Hint extends StatelessWidget {
-  final String text;
-  const _Hint(this.text);
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(top: 8, left: 8, right: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cs.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
+      appBar: AppBar(
+        title: const Text(
+          'Debate con IA',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        actions: [
+          if (_messages.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: () {
+                setState(() {
+                  _messages = [];
+                  _debateStarted = false;
+                  _turnCount = 0;
+                });
+              },
+              tooltip: 'Reiniciar debate',
+            ),
+        ],
       ),
-      child: Row(
+      body: Column(
         children: [
-          Icon(Icons.tips_and_updates_rounded, color: cs.onSecondaryContainer),
-          const SizedBox(width: 8),
-          Expanded(child: Text(text, style: TextStyle(color: cs.onSecondaryContainer))),
+          // Selector de tema
+          if (!_debateStarted)
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF6C5CE7), Color(0xFF00B4DB)],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.topic_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Selecciona un tema',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _selectedTopic,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFFF5F7FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    items: _topics
+                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedTopic = v!),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: FilledButton.icon(
+                      onPressed: _startDebate,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF6C5CE7),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      label: const Text(
+                        'Iniciar debate',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+                .animate()
+                .fadeIn(duration: 400.ms)
+                .slideY(begin: 0.1, curve: Curves.easeOut),
+
+          // Lista de mensajes
+          if (_debateStarted)
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                itemCount: _messages.length + (_isTyping ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == _messages.length && _isTyping) {
+                    return const TypingIndicator();
+                  }
+                  return MessageBubble(message: _messages[index]);
+                },
+              ),
+            ),
+
+          // Input de mensaje
+          if (_debateStarted)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        maxLines: null,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          hintText: 'Escribe tu argumento...',
+                          filled: true,
+                          fillColor: const Color(0xFFF5F7FA),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        onSubmitted: (_) => _sendMessage(),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6C5CE7), Color(0xFF00B4DB)],
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6C5CE7).withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: _isTyping ? null : _sendMessage,
+                        icon: const Icon(Icons.send_rounded, color: Colors.white),
+                        iconSize: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
-class _HistorialTab extends StatelessWidget {
-  const _HistorialTab();
-
-  @override
-  Widget build(BuildContext context) {
-    final items = List.generate(6, (i) => 'Debate #${i + 1} • ${i + 12}/09/2025 • 60s por turno');
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, i) {
-        return Card(
-          child: ListTile(
-            leading: const Icon(Icons.history_edu_rounded),
-            title: Text(items[i]),
-            subtitle: const Text('Tema: Renta básica • Resultado: equilibrio'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
-          ),
-        ).animate().fadeIn(duration: (200 + i * 60).ms).slide(begin: const Offset(0, .05));
-      },
-    );
-  }
-}
