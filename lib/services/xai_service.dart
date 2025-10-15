@@ -6,13 +6,14 @@ class XAIService {
   XAIService._();
   static final XAIService instance = XAIService._();
 
-  // IMPORTANTE: Cambia esta URL cuando despliegues en Render
-  // Local: http://localhost:8000
-  // Render: https://tu-app.onrender.com
-  static const String _baseUrl = 'http://localhost:8000';
+  // URL del backend desplegado en Render
+  static const String _baseUrl = 'https://argumenta-api.onrender.com';
   
-  // Timeout para peticiones
-  static const Duration _timeout = Duration(seconds: 30);
+  // Para desarrollo local, cambia a: 'http://localhost:8000'
+  // Para emulador Android: 'http://10.0.2.2:8000'
+  
+  // Timeout extendido porque Render puede tardar en "despertar" en plan gratuito
+  static const Duration _timeout = Duration(seconds: 60);
 
   /// Envía mensaje al chatbot y recibe respuesta
   Future<ChatMessage> sendMessage({
