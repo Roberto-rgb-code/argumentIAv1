@@ -8,7 +8,7 @@ import 'theme/app_theme.dart';
 
 // Páginas existentes
 import 'pages/home_page.dart' as home;
-import 'pages/chatbot/chatbot_duolingo_page.dart' as chat;
+import 'pages/chatbot/chatbot_final_page.dart' as chat;
 import 'pages/forums/forums_page.dart' as forums;
 import 'pages/events/events_page.dart' as events;
 import 'pages/lessons/lessons_page_v2.dart' as lessons;
@@ -57,14 +57,14 @@ class _Shell extends StatefulWidget {
 class _ShellState extends State<_Shell> {
   int _index = 0;
 
-  late final List<Widget> _tabs = const <Widget>[
-    home.HomePage(),
-    chat.ChatbotPage(),
-    forums.ForumsPage(),
-    events.EventsPage(),
-    lessons.LessonsPage(),
-    profile.ProfilePage(),
-  ];
+          late final List<Widget> _tabs = const <Widget>[
+            home.HomePage(),
+            chat.ChatbotFinalPage(),
+            forums.ForumsPage(),
+            events.EventsPage(),
+            lessons.LessonsPageV2(),
+            profile.ProfilePage(),
+          ];
 
   @override
   Widget build(BuildContext context) {

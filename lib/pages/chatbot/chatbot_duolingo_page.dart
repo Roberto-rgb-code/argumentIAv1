@@ -314,7 +314,7 @@ class _ChatbotDuolingoPageState extends State<ChatbotDuolingoPage>
       case DebateStage.motionDisplay:
         return _buildMotionDisplay();
       case DebateStage.stanceSelection:
-        return _buildStanceSelection();
+        return _buildMotionDisplay();
       case DebateStage.debateActive:
         return _buildDebateInterface();
       case DebateStage.debateCompleted:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
+import '../../theme/app_theme.dart';
 
 class DialectaAnimations {
   // Animación de carga con Lottie
@@ -255,15 +256,15 @@ class DialectaAnimations {
   }) {
     return child.animate(onPlay: (controller) => controller.repeat())
         .scale(
-          begin: 1.0,
-          end: scale ?? 1.05,
+          begin: const Offset(1.0, 1.0),
+          end: Offset(scale ?? 1.05, scale ?? 1.05),
           duration: 1000.ms,
           curve: Curves.easeInOut,
         )
         .then()
         .scale(
-          begin: scale ?? 1.05,
-          end: 1.0,
+          begin: Offset(scale ?? 1.05, scale ?? 1.05),
+          end: const Offset(1.0, 1.0),
           duration: 1000.ms,
           curve: Curves.easeInOut,
         );
@@ -364,5 +365,3 @@ class DialectaPageTransition extends StatelessWidget {
   }
 }
 
-// Import necesario para AppTheme
-import '../../theme/app_theme.dart';
