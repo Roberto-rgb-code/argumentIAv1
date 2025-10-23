@@ -8,10 +8,10 @@ import 'theme/app_theme.dart';
 
 // Páginas existentes
 import 'pages/home_page.dart' as home;
-import 'pages/chatbot/chatbot_page.dart' as chat;
+import 'pages/chatbot/chatbot_duolingo_page.dart' as chat;
 import 'pages/forums/forums_page.dart' as forums;
 import 'pages/events/events_page.dart' as events;
-import 'pages/lessons/lessons_page.dart' as lessons;
+import 'pages/lessons/lessons_page_v2.dart' as lessons;
 import 'pages/profile/profile_page.dart' as profile;
 
 // Nuevo: compuerta de autenticación
