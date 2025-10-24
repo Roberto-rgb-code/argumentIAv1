@@ -1,18 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 import '../models/forum_models.dart';
 import '../models/event_models.dart';
+import '../models/university_user.dart';
+import '../config/firebase_config.dart';
 
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
   factory FirebaseService() => _instance;
   FirebaseService._internal();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Usar la configuración centralizada
+  FirebaseFirestore get _firestore => FirebaseConfig.firestore;
+  FirebaseStorage get _storage => FirebaseConfig.storage;
+  FirebaseAuth get _auth => FirebaseConfig.auth;
 
   // === FOROS ===
   
@@ -311,6 +316,240 @@ class FirebaseService {
       await ref.delete();
     } catch (e) {
       throw Exception('Error al eliminar imagen: $e');
+    }
+  }
+
+  // === USUARIOS UNIVERSITARIOS ===
+
+  // Crear usuario universitario
+  Future<String> createUniversityUser({
+    required String email,
+    required String displayName,
+    required String university,
+    required String career,
+    required String studentId,
+    required int semester,
+    List<String>? interests,
+    String? bio,
+    String? linkedinUrl,
+    String? githubUrl,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Usuario no autenticado');
+
+      final universityUser = UniversityUser(
+        id: user.uid,
+        email: email,
+        displayName: displayName,
+        university: university,
+        career: career,
+        studentId: studentId,
+        semester: semester,
+        interests: interests ?? [],
+        bio: bio,
+        linkedinUrl: linkedinUrl,
+        githubUrl: githubUrl,
+        createdAt: DateTime.now(),
+        lastActive: DateTime.now(),
+        stats: {
+          'totalDebates': 0,
+          'totalEvents': 0,
+          'totalVotes': 0,
+          'totalComments': 0,
+          'xp': 0,
+          'streak': 0,
+        },
+      );
+
+      await _firestore.collection('users').doc(user.uid).set(
+        universityUser.toFirestore(),
+      );
+
+      return user.uid;
+    } catch (e) {
+      throw Exception('Error al crear usuario universitario: $e');
+    }
+  }
+
+  // Obtener usuario universitario
+  Future<UniversityUser?> getUniversityUser(String userId) async {
+    try {
+      final doc = await _firestore.collection('users').doc(userId).get();
+      if (doc.exists) {
+        return UniversityUser.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Error al obtener usuario: $e');
+    }
+  }
+
+  // Obtener usuario actual
+  Future<UniversityUser?> getCurrentUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return null;
+      return await getUniversityUser(user.uid);
+    } catch (e) {
+      throw Exception('Error al obtener usuario actual: $e');
+    }
+  }
+
+  // Actualizar perfil universitario
+  Future<void> updateUniversityProfile({
+    String? displayName,
+    String? university,
+    String? career,
+    String? studentId,
+    int? semester,
+    List<String>? interests,
+    String? bio,
+    String? linkedinUrl,
+    String? githubUrl,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Usuario no autenticado');
+
+      final updateData = <String, dynamic>{};
+      if (displayName != null) updateData['displayName'] = displayName;
+      if (university != null) updateData['university'] = university;
+      if (career != null) updateData['career'] = career;
+      if (studentId != null) updateData['studentId'] = studentId;
+      if (semester != null) updateData['semester'] = semester;
+      if (interests != null) updateData['interests'] = interests;
+      if (bio != null) updateData['bio'] = bio;
+      if (linkedinUrl != null) updateData['linkedinUrl'] = linkedinUrl;
+      if (githubUrl != null) updateData['githubUrl'] = githubUrl;
+
+      updateData['lastActive'] = FieldValue.serverTimestamp();
+
+      await _firestore.collection('users').doc(user.uid).update(updateData);
+    } catch (e) {
+      throw Exception('Error al actualizar perfil: $e');
+    }
+  }
+
+  // Subir imagen de perfil
+  Future<String> uploadProfileImage(File imageFile) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Usuario no autenticado');
+
+      final ref = _storage.ref().child('users/${user.uid}/profile.jpg');
+      final uploadTask = ref.putFile(imageFile);
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Actualizar URL en el perfil
+      await _firestore.collection('users').doc(user.uid).update({
+        'profileImageUrl': downloadUrl,
+        'lastActive': FieldValue.serverTimestamp(),
+      });
+
+      return downloadUrl;
+    } catch (e) {
+      throw Exception('Error al subir imagen de perfil: $e');
+    }
+  }
+
+  // Actualizar estadísticas del usuario
+  Future<void> updateUserStats({
+    int? totalDebates,
+    int? totalEvents,
+    int? totalVotes,
+    int? totalComments,
+    int? xp,
+    int? streak,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Usuario no autenticado');
+
+      final updateData = <String, dynamic>{};
+      if (totalDebates != null) updateData['stats.totalDebates'] = FieldValue.increment(totalDebates);
+      if (totalEvents != null) updateData['stats.totalEvents'] = FieldValue.increment(totalEvents);
+      if (totalVotes != null) updateData['stats.totalVotes'] = FieldValue.increment(totalVotes);
+      if (totalComments != null) updateData['stats.totalComments'] = FieldValue.increment(totalComments);
+      if (xp != null) updateData['stats.xp'] = FieldValue.increment(xp);
+      if (streak != null) updateData['stats.streak'] = streak;
+
+      updateData['lastActive'] = FieldValue.serverTimestamp();
+
+      await _firestore.collection('users').doc(user.uid).update(updateData);
+    } catch (e) {
+      throw Exception('Error al actualizar estadísticas: $e');
+    }
+  }
+
+  // Obtener ranking de usuarios
+  Stream<List<UniversityUser>> getUsersRanking({int limit = 10}) {
+    return _firestore
+        .collection('users')
+        .orderBy('stats.xp', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => UniversityUser.fromFirestore(doc)).toList();
+    });
+  }
+
+  // Buscar usuarios por universidad
+  Stream<List<UniversityUser>> getUsersByUniversity(String university) {
+    return _firestore
+        .collection('users')
+        .where('university', isEqualTo: university)
+        .orderBy('stats.xp', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => UniversityUser.fromFirestore(doc)).toList();
+    });
+  }
+
+  // Buscar usuarios por carrera
+  Stream<List<UniversityUser>> getUsersByCareer(String career) {
+    return _firestore
+        .collection('users')
+        .where('career', isEqualTo: career)
+        .orderBy('stats.xp', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => UniversityUser.fromFirestore(doc)).toList();
+    });
+  }
+
+  // Verificar si el usuario existe
+  Future<bool> userExists(String userId) async {
+    try {
+      final doc = await _firestore.collection('users').doc(userId).get();
+      return doc.exists;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Eliminar usuario
+  Future<void> deleteUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Usuario no autenticado');
+
+      // Eliminar datos del usuario
+      await _firestore.collection('users').doc(user.uid).delete();
+      
+      // Eliminar imagen de perfil si existe
+      try {
+        final ref = _storage.ref().child('users/${user.uid}/profile.jpg');
+        await ref.delete();
+      } catch (e) {
+        // La imagen puede no existir
+      }
+
+      // Eliminar cuenta de Firebase Auth
+      await user.delete();
+    } catch (e) {
+      throw Exception('Error al eliminar usuario: $e');
     }
   }
 }
