@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 class AppTheme {
   // Paleta de colores de la identidad corporativa
@@ -417,4 +418,345 @@ extension AppShadows on BuildContext {
   List<BoxShadow> get softShadow => AppTheme.softShadow;
   List<BoxShadow> get cardShadow => AppTheme.cardShadow;
   List<BoxShadow> get buttonShadow => AppTheme.buttonShadow;
+}
+
+// === Material Design 3 Theme ===
+class AppThemeM3 {
+  // Color scheme M3 basado en la identidad Dialecta
+  static ColorScheme get lightColorScheme {
+    return ColorScheme.fromSeed(
+      seedColor: AppTheme.primaryBlue,
+      brightness: Brightness.light,
+      primary: AppTheme.primaryBlue,
+      secondary: AppTheme.mintGreen,
+      tertiary: AppTheme.brightOrange,
+      surface: Colors.white,
+      surfaceContainer: AppTheme.lightGray,
+      surfaceContainerHigh: Colors.white,
+      surfaceContainerHighest: AppTheme.lightGray,
+      outline: AppTheme.primaryBlue.withOpacity(0.3),
+      outlineVariant: AppTheme.primaryBlue.withOpacity(0.1),
+      error: AppTheme.coralRed,
+      onPrimary: Colors.white,
+      onSecondary: AppTheme.charcoalBlack,
+      onTertiary: Colors.white,
+      onSurface: AppTheme.charcoalBlack,
+      onSurfaceVariant: AppTheme.charcoalBlack.withOpacity(0.7),
+      onError: Colors.white,
+    );
+  }
+
+  static ColorScheme get darkColorScheme {
+    return ColorScheme.fromSeed(
+      seedColor: AppTheme.primaryBlue,
+      brightness: Brightness.dark,
+      primary: AppTheme.primaryBlue,
+      secondary: AppTheme.mintGreen,
+      tertiary: AppTheme.brightOrange,
+      surface: const Color(0xFF1A1A1A),
+      surfaceContainer: const Color(0xFF2A2A2A),
+      surfaceContainerHigh: const Color(0xFF3A3A3A),
+      surfaceContainerHighest: const Color(0xFF4A4A4A),
+      outline: AppTheme.primaryBlue.withOpacity(0.5),
+      outlineVariant: AppTheme.primaryBlue.withOpacity(0.2),
+      error: AppTheme.coralRed,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onTertiary: Colors.white,
+      onSurface: Colors.white,
+      onSurfaceVariant: Colors.white.withOpacity(0.7),
+      onError: Colors.white,
+    );
+  }
+
+  // Tema M3 completo
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: lightColorScheme,
+      textTheme: GoogleFonts.interTextTheme(),
+      
+      // AppBar M3
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.white,
+        foregroundColor: AppTheme.charcoalBlack,
+        elevation: 0,
+        surfaceTintColor: AppTheme.primaryBlue,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: AppTheme.charcoalBlack,
+        ),
+        centerTitle: false,
+      ),
+
+      // Navigation Bar M3
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: AppTheme.primaryBlue,
+        indicatorColor: AppTheme.primaryBlue.withOpacity(0.2),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryBlue,
+            );
+          }
+          return GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.charcoalBlack.withOpacity(0.6),
+          );
+        }),
+      ),
+
+      // Cards M3
+      cardTheme: CardTheme(
+        elevation: 2,
+        color: Colors.white,
+        surfaceTintColor: AppTheme.primaryBlue.withOpacity(0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.all(8),
+      ),
+
+      // Buttons M3
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppTheme.primaryBlue,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          textStyle: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppTheme.primaryBlue,
+          side: BorderSide(
+            color: AppTheme.primaryBlue,
+            width: 1.5,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          textStyle: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          textStyle: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+      // Text Fields M3
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppTheme.primaryBlue.withOpacity(0.3),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppTheme.primaryBlue.withOpacity(0.3),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppTheme.primaryBlue,
+            width: 2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppTheme.coralRed,
+            width: 2,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        labelStyle: GoogleFonts.inter(
+          fontSize: 16,
+          color: AppTheme.charcoalBlack.withOpacity(0.7),
+        ),
+        hintStyle: GoogleFonts.inter(
+          fontSize: 16,
+          color: AppTheme.charcoalBlack.withOpacity(0.5),
+        ),
+      ),
+
+      // Chips M3
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.white,
+        selectedColor: AppTheme.primaryBlue,
+        labelStyle: GoogleFonts.inter(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        side: BorderSide(
+          color: AppTheme.primaryBlue.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+
+      // Floating Action Button M3
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppTheme.primaryBlue,
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+
+      // Progress Indicators M3
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: AppTheme.primaryBlue,
+        linearTrackColor: AppTheme.primaryBlue.withOpacity(0.2),
+        circularTrackColor: AppTheme.primaryBlue.withOpacity(0.2),
+      ),
+
+      // Dialogs M3
+      dialogTheme: DialogTheme(
+        backgroundColor: Colors.white,
+        surfaceTintColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: AppTheme.charcoalBlack,
+        ),
+        contentTextStyle: GoogleFonts.inter(
+          fontSize: 16,
+          color: AppTheme.charcoalBlack.withOpacity(0.8),
+        ),
+      ),
+
+      // Snackbar M3
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppTheme.charcoalBlack,
+        contentTextStyle: GoogleFonts.inter(
+          fontSize: 14,
+          color: Colors.white,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+
+      // Bottom Sheet M3
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: AppTheme.primaryBlue,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(16),
+          ),
+        ),
+      ),
+
+      // Tab Bar M3
+      tabBarTheme: TabBarTheme(
+        labelColor: AppTheme.primaryBlue,
+        unselectedLabelColor: AppTheme.charcoalBlack.withOpacity(0.6),
+        indicatorColor: AppTheme.primaryBlue,
+        labelStyle: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: darkColorScheme,
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+      
+      // AppBar M3 Dark
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF1A1A1A),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: AppTheme.primaryBlue,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+        centerTitle: false,
+      ),
+
+      // Navigation Bar M3 Dark
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: const Color(0xFF1A1A1A),
+        surfaceTintColor: AppTheme.primaryBlue,
+        indicatorColor: AppTheme.primaryBlue.withOpacity(0.3),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryBlue,
+            );
+          }
+          return GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.6),
+          );
+        }),
+      ),
+
+      // Cards M3 Dark
+      cardTheme: CardTheme(
+        elevation: 2,
+        color: const Color(0xFF2A2A2A),
+        surfaceTintColor: AppTheme.primaryBlue.withOpacity(0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.all(8),
+      ),
+
+      // Resto de temas dark similares...
+    );
+  }
 }
