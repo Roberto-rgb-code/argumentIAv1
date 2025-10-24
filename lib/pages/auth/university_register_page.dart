@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 import '../../widgets/m3/dialecta_m3_components.dart';
 import '../../theme/app_theme.dart';
@@ -20,7 +18,6 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _firebaseService = FirebaseService();
   final _authService = AuthService();
-  final _imagePicker = ImagePicker();
 
   // Controladores
   final _emailController = TextEditingController();
@@ -31,13 +28,13 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
   final _bioController = TextEditingController();
   final _linkedinController = TextEditingController();
   final _githubController = TextEditingController();
+  final _profileImageController = TextEditingController();
 
   // Variables de estado
   String _selectedUniversity = '';
   String _selectedCareer = '';
   int _selectedSemester = 1;
   List<String> _selectedInterests = [];
-  File? _profileImage;
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -52,6 +49,7 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
     _bioController.dispose();
     _linkedinController.dispose();
     _githubController.dispose();
+    _profileImageController.dispose();
     super.dispose();
   }
 
@@ -118,49 +116,26 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
   }
 
   Widget _buildProfileImageSection() {
-    return Center(
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: _pickProfileImage,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppTheme.primaryBlue,
-                  width: 3,
-                ),
-                color: AppTheme.primaryBlue.withOpacity(0.1),
-              ),
-              child: _profileImage != null
-                  ? ClipOval(
-                      child: Image.file(
-                        _profileImage!,
-                        fit: BoxFit.cover,
-                        width: 120,
-                        height: 120,
-                      ),
-                    )
-                  : Icon(
-                      Icons.person_add_rounded,
-                      size: 48,
-                      color: AppTheme.primaryBlue,
-                    ),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Imagen de Perfil (Opcional)',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.charcoalBlack,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Toca para agregar foto de perfil',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: AppTheme.primaryBlue,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        DialectaM3Components.textField(
+          label: 'URL de imagen de perfil',
+          hint: 'https://ejemplo.com/mi-foto.jpg',
+          controller: _profileImageController,
+          keyboardType: TextInputType.url,
+          helperText: 'Puedes usar servicios como Imgur, Gravatar, etc.',
+        ),
+      ],
     );
   }
 
@@ -488,29 +463,6 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
     );
   }
 
-  Future<void> _pickProfileImage() async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 512,
-        maxHeight: 512,
-        imageQuality: 80,
-      );
-
-      if (image != null) {
-        setState(() {
-          _profileImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al seleccionar imagen: $e'),
-          backgroundColor: AppTheme.coralRed,
-        ),
-      );
-    }
-  }
 
   Future<void> _registerUser() async {
     if (!_formKey.currentState!.validate()) return;
@@ -523,12 +475,6 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
         _emailController.text.trim(),
         _passwordController.text,
       );
-
-      // Subir imagen de perfil si existe
-      String? profileImageUrl;
-      if (_profileImage != null) {
-        profileImageUrl = await _firebaseService.uploadProfileImage(_profileImage!);
-      }
 
       // Crear perfil universitario
       await _firebaseService.createUniversityUser(
@@ -543,6 +489,11 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
         linkedinUrl: _linkedinController.text.trim().isEmpty ? null : _linkedinController.text.trim(),
         githubUrl: _githubController.text.trim().isEmpty ? null : _githubController.text.trim(),
       );
+
+      // Actualizar imagen de perfil si se proporcionó URL
+      if (_profileImageController.text.trim().isNotEmpty) {
+        await _firebaseService.updateProfileImageUrl(_profileImageController.text.trim());
+      }
 
       // Navegar al home
       if (mounted) {

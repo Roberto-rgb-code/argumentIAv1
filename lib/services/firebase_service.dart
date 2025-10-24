@@ -1,8 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 import '../models/forum_models.dart';
 import '../models/event_models.dart';
@@ -16,7 +13,6 @@ class FirebaseService {
 
   // Usar la configuración centralizada
   FirebaseFirestore get _firestore => FirebaseConfig.firestore;
-  FirebaseStorage get _storage => FirebaseConfig.storage;
   FirebaseAuth get _auth => FirebaseConfig.auth;
 
   // === FOROS ===
@@ -295,29 +291,14 @@ class FirebaseService {
     }
   }
 
-  // === STORAGE ===
+  // === IMÁGENES (Solo URLs) ===
 
-  // Subir imagen
-  Future<String> uploadImage(String path, List<int> imageBytes) async {
-    try {
-      final ref = _storage.ref().child(path);
-      final uploadTask = ref.putData(imageBytes);
-      final snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
-    } catch (e) {
-      throw Exception('Error al subir imagen: $e');
-    }
-  }
-
-  // Eliminar imagen
-  Future<void> deleteImage(String url) async {
-    try {
-      final ref = _storage.refFromURL(url);
-      await ref.delete();
-    } catch (e) {
-      throw Exception('Error al eliminar imagen: $e');
-    }
-  }
+  // Las imágenes se manejan como URLs externas
+  // Los usuarios pueden usar servicios como:
+  // - Imgur
+  // - Cloudinary
+  // - Gravatar
+  // - O cualquier servicio de hosting de imágenes
 
   // === USUARIOS UNIVERSITARIOS ===
 
@@ -431,26 +412,18 @@ class FirebaseService {
     }
   }
 
-  // Subir imagen de perfil
-  Future<String> uploadProfileImage(File imageFile) async {
+  // Actualizar URL de imagen de perfil (URL externa)
+  Future<void> updateProfileImageUrl(String imageUrl) async {
     try {
       final user = _auth.currentUser;
       if (user == null) throw Exception('Usuario no autenticado');
 
-      final ref = _storage.ref().child('users/${user.uid}/profile.jpg');
-      final uploadTask = ref.putFile(imageFile);
-      final snapshot = await uploadTask;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-
-      // Actualizar URL en el perfil
       await _firestore.collection('users').doc(user.uid).update({
-        'profileImageUrl': downloadUrl,
+        'profileImageUrl': imageUrl,
         'lastActive': FieldValue.serverTimestamp(),
       });
-
-      return downloadUrl;
     } catch (e) {
-      throw Exception('Error al subir imagen de perfil: $e');
+      throw Exception('Error al actualizar imagen de perfil: $e');
     }
   }
 
@@ -538,13 +511,7 @@ class FirebaseService {
       // Eliminar datos del usuario
       await _firestore.collection('users').doc(user.uid).delete();
       
-      // Eliminar imagen de perfil si existe
-      try {
-        final ref = _storage.ref().child('users/${user.uid}/profile.jpg');
-        await ref.delete();
-      } catch (e) {
-        // La imagen puede no existir
-      }
+      // No hay Storage, solo eliminar datos del usuario
 
       // Eliminar cuenta de Firebase Auth
       await user.delete();
