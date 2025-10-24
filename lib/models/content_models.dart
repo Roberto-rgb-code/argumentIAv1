@@ -139,31 +139,6 @@ class DebateMotion {
   });
 }
 
-class Exercise {
-  final String id;
-  final String title;
-  final String description;
-  final String type;
-  final String difficulty;
-  final String content;
-  final List<String> answers;
-  final int points;
-  final String? hint;
-  final String? explanation;
-
-  const Exercise({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.type,
-    required this.difficulty,
-    required this.content,
-    required this.answers,
-    required this.points,
-    this.hint,
-    this.explanation,
-  });
-}
 
 class TrainingMethod {
   final String id;

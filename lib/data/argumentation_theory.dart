@@ -1,4 +1,5 @@
 import '../models/content_models.dart';
+import '../models/lesson_models.dart';
 
 class ArgumentationTheory {
   // === TEORÍA DE LA ARGUMENTACIÓN ===
@@ -98,7 +99,7 @@ Un argumento es una serie de afirmaciones donde una (la conclusión) se deriva d
 ## E - Evidencia (Evidence)
 **Definición**: Datos, estadísticas, estudios que apoyan tu razón.
 
-**Ejemplo**: "Según la OIT, 1.4 mil millones de trabajadores ganan menos de $2 USD diarios"
+**Ejemplo**: "Según la OIT, 1.4 mil millones de trabajadores ganan menos de \$2 USD diarios"
 
 ## A - Análisis (Analysis)
 **Definición**: Explicación de cómo la evidencia apoya tu razón.
@@ -113,7 +114,7 @@ Un argumento es una serie de afirmaciones donde una (la conclusión) se deriva d
 ## Ejemplo completo:
 **Afirmación**: El gobierno debe implementar un salario mínimo universal
 **Razón**: Porque garantiza un nivel básico de vida digna
-**Evidencia**: 1.4 mil millones ganan menos de $2 USD diarios (OIT)
+**Evidencia**: 1.4 mil millones ganan menos de \$2 USD diarios (OIT)
 **Análisis**: Esto significa pobreza extrema que justifica intervención estatal
 **Limitaciones**: Podría aumentar inflación, pero beneficios superan costos
 ''',
@@ -553,10 +554,17 @@ Un argumento es una serie de afirmaciones donde una (la conclusión) se deriva d
     Exercise(
       id: 'ex_001',
       title: 'Identificar Falacias',
-      description: 'Reconoce las falacias en argumentos dados',
-      type: 'identification',
-      difficulty: 'beginner',
-      content: '''
+      instruction: 'Reconoce las falacias en argumentos dados',
+      type: ExerciseType.multipleChoice,
+      content: {
+        'question': 'Identifica la falacia en el siguiente argumento:',
+        'options': [
+          'Appeal to Authority',
+          'Slippery Slope', 
+          'Post Hoc Ergo Propter Hoc',
+          'Falsa Dicotomía'
+        ],
+        'exercise_content': '''
 # Ejercicio: Identificar Falacias
 
 ## Instrucciones:
@@ -581,22 +589,22 @@ Lee cada argumento y identifica qué tipo de falacia contiene.
 "O estás con nosotros en la guerra contra el terrorismo, o estás con los terroristas."
 
 **Falacia**: Falsa Dicotomía
-''',
-      answers: [
-        'Appeal to Authority',
-        'Slippery Slope', 
-        'Post Hoc Ergo Propter Hoc',
-        'Falsa Dicotomía'
-      ],
+'''
+      },
+      correctAnswers: ['0', '1', '2', '3'],
+      points: 25,
+      hint: 'Revisa cada argumento y identifica el tipo de falacia lógica que contiene.',
+      explanation: 'Cada argumento contiene una falacia específica que debes identificar correctamente.',
     ),
     
     Exercise(
       id: 'ex_002',
       title: 'Construir Argumentos AREAL',
-      description: 'Crea argumentos usando la estructura AREAL',
-      type: 'construction',
-      difficulty: 'intermediate',
-      content: '''
+      instruction: 'Crea argumentos usando la estructura AREAL',
+      type: ExerciseType.textInput,
+      content: {
+        'question': 'Para la afirmación "El gobierno debería invertir más en educación pública", construye un argumento completo usando AREAL.',
+        'exercise_content': '''
 # Ejercicio: Construir Argumentos AREAL
 
 ## Instrucciones:
@@ -616,14 +624,18 @@ Para la afirmación "El gobierno debería invertir más en educación pública",
 **A - Análisis**: La evidencia muestra que la educación genera retornos económicos claros y mejora la competitividad nacional
 
 **L - Limitaciones**: Aunque requiere recursos significativos, los beneficios a largo plazo superan los costos
-''',
-      answers: [
+'''
+      },
+      correctAnswers: [
         'Afirmación clara y específica',
         'Razón lógica y relevante',
         'Evidencia concreta y creíble',
         'Análisis que conecta evidencia con razón',
         'Reconocimiento de limitaciones'
       ],
+      points: 50,
+      hint: 'Usa la estructura AREAL para crear un argumento completo y bien fundamentado.',
+      explanation: 'Un buen argumento AREAL incluye todos los elementos: afirmación clara, razón sólida, evidencia relevante, análisis lógico y reconocimiento de limitaciones.',
     ),
   ];
 

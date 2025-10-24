@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 class AppTheme {
   // Paleta de colores de la identidad corporativa
@@ -512,7 +511,7 @@ class AppThemeM3 {
       ),
 
       // Cards M3
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         color: Colors.white,
         surfaceTintColor: AppTheme.primaryBlue.withOpacity(0.1),
@@ -646,7 +645,7 @@ class AppThemeM3 {
       ),
 
       // Dialogs M3
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: Colors.white,
         surfaceTintColor: AppTheme.primaryBlue,
         shape: RoundedRectangleBorder(
@@ -688,7 +687,7 @@ class AppThemeM3 {
       ),
 
       // Tab Bar M3
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: AppTheme.primaryBlue,
         unselectedLabelColor: AppTheme.charcoalBlack.withOpacity(0.6),
         indicatorColor: AppTheme.primaryBlue,
@@ -746,7 +745,7 @@ class AppThemeM3 {
       ),
 
       // Cards M3 Dark
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         color: const Color(0xFF2A2A2A),
         surfaceTintColor: AppTheme.primaryBlue.withOpacity(0.1),

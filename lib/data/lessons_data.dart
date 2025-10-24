@@ -1,4 +1,5 @@
 import '../models/lesson_models.dart';
+import '../models/content_models.dart';
 import 'argumentation_theory.dart';
 
 class LessonsData {
@@ -20,6 +21,14 @@ class LessonsData {
       ..._getRazonamientoLessons(),
       // === LIMITACIONES ===
       ..._getLimitacionesLessons(),
+      // === TEORÍA DE ARGUMENTACIÓN ===
+      ..._getArgumentationTheoryLessons(),
+      // === TÉCNICAS DE REFUTACIÓN ===
+      ..._getRefutationLessons(),
+      // === TIPOS DE MOCIONES ===
+      ..._getMotionTypesLessons(),
+      // === TIPOS DE FALACIAS ===
+      ..._getFallacyTypesLessons(),
     ];
   }
 
@@ -761,11 +770,15 @@ class LessonsData {
         id: theory.id,
         title: theory.title,
         description: theory.description,
-        category: theory.category,
-        difficulty: theory.difficulty,
-        estimatedTime: theory.estimatedTime,
-        xpReward: _getXpReward(theory.difficulty),
+        type: _getLessonType(theory.category),
+        difficulty: _getDifficulty(theory.difficulty),
+        estimatedMinutes: theory.estimatedTime,
         exercises: _convertTheoryToExercises(theory),
+        tags: [theory.category],
+        pointsReward: _getXpReward(theory.difficulty),
+        imageUrl: null,
+        videoUrl: null,
+        createdAt: DateTime.now(),
       );
     }).toList();
   }
@@ -777,11 +790,15 @@ class LessonsData {
         id: theory.id,
         title: theory.title,
         description: theory.description,
-        category: theory.category,
-        difficulty: theory.difficulty,
-        estimatedTime: theory.estimatedTime,
-        xpReward: _getXpReward(theory.difficulty),
+        type: _getLessonType(theory.category),
+        difficulty: _getDifficulty(theory.difficulty),
+        estimatedMinutes: theory.estimatedTime,
         exercises: _convertTheoryToExercises(theory),
+        tags: [theory.category],
+        pointsReward: _getXpReward(theory.difficulty),
+        imageUrl: null,
+        videoUrl: null,
+        createdAt: DateTime.now(),
       );
     }).toList();
   }
@@ -793,11 +810,15 @@ class LessonsData {
         id: theory.id,
         title: theory.title,
         description: theory.description,
-        category: theory.category,
-        difficulty: theory.difficulty,
-        estimatedTime: theory.estimatedTime,
-        xpReward: _getXpReward(theory.difficulty),
+        type: _getLessonType(theory.category),
+        difficulty: _getDifficulty(theory.difficulty),
+        estimatedMinutes: theory.estimatedTime,
         exercises: _convertTheoryToExercises(theory),
+        tags: [theory.category],
+        pointsReward: _getXpReward(theory.difficulty),
+        imageUrl: null,
+        videoUrl: null,
+        createdAt: DateTime.now(),
       );
     }).toList();
   }
@@ -809,11 +830,15 @@ class LessonsData {
         id: theory.id,
         title: theory.title,
         description: theory.description,
-        category: theory.category,
-        difficulty: theory.difficulty,
-        estimatedTime: theory.estimatedTime,
-        xpReward: _getXpReward(theory.difficulty),
+        type: _getLessonType(theory.category),
+        difficulty: _getDifficulty(theory.difficulty),
+        estimatedMinutes: theory.estimatedTime,
         exercises: _convertTheoryToExercises(theory),
+        tags: [theory.category],
+        pointsReward: _getXpReward(theory.difficulty),
+        imageUrl: null,
+        videoUrl: null,
+        createdAt: DateTime.now(),
       );
     }).toList();
   }
@@ -829,15 +854,41 @@ class LessonsData {
     }
   }
 
+  static LessonType _getLessonType(String category) {
+    switch (category.toLowerCase()) {
+      case 'teoría': return LessonType.areal;
+      case 'refutación': return LessonType.refutacion;
+      case 'mociones': return LessonType.areal;
+      case 'falacias': return LessonType.falacias;
+      default: return LessonType.areal;
+    }
+  }
+
+  static Difficulty _getDifficulty(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner': return Difficulty.basico;
+      case 'intermediate': return Difficulty.intermedio;
+      case 'advanced': return Difficulty.avanzado;
+      default: return Difficulty.basico;
+    }
+  }
+
   static List<Exercise> _convertTheoryToExercises(TheorySection theory) {
     return [
       Exercise(
         id: '${theory.id}_ex_001',
         title: 'Comprensión de ${theory.title}',
-        description: 'Ejercicio de comprensión sobre ${theory.title}',
-        type: 'comprehension',
-        difficulty: theory.difficulty,
-        content: '''
+        instruction: 'Basándote en el contenido teórico, responde la siguiente pregunta:',
+        type: ExerciseType.multipleChoice,
+        content: {
+          'question': '¿Cuál es el concepto principal de ${theory.title}?',
+          'options': [
+            'Un concepto básico de argumentación',
+            'Una técnica avanzada de debate',
+            'Un tipo de falacia común',
+            'Una metodología de refutación'
+          ],
+          'theory_content': '''
 # ${theory.title}
 
 ${theory.content}
@@ -846,14 +897,9 @@ ${theory.content}
 Basándote en el contenido anterior, responde la siguiente pregunta:
 
 ¿Cuál es el concepto principal de ${theory.title}?
-
-## Opciones:
-A) Un concepto básico de argumentación
-B) Una técnica avanzada de debate
-C) Un tipo de falacia común
-D) Una metodología de refutación
-''',
-        answers: ['A'],
+'''
+        },
+        correctAnswers: ['0'],
         points: _getXpReward(theory.difficulty),
         hint: 'Revisa cuidadosamente el contenido teórico para identificar el concepto principal.',
         explanation: 'El concepto principal se encuentra en la definición y explicación del contenido teórico.',
