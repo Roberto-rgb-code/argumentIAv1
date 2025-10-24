@@ -92,3 +92,93 @@ class Habilidad {
 
   static Habilidad fromJson(String jsonStr) => Habilidad.fromMap(json.decode(jsonStr));
 }
+
+// === NUEVOS MODELOS PARA TEORÍA DE ARGUMENTACIÓN ===
+
+class TheorySection {
+  final String id;
+  final String title;
+  final String description;
+  final String content;
+  final String difficulty;
+  final String category;
+  final int estimatedTime;
+
+  const TheorySection({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.content,
+    required this.difficulty,
+    required this.category,
+    required this.estimatedTime,
+  });
+}
+
+class DebateMotion {
+  final String id;
+  final String title;
+  final String description;
+  final String category;
+  final String difficulty;
+  final String type;
+  final String context;
+  final List<String> keyArguments;
+  final List<String> evidence;
+
+  const DebateMotion({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.difficulty,
+    required this.type,
+    required this.context,
+    required this.keyArguments,
+    required this.evidence,
+  });
+}
+
+class Exercise {
+  final String id;
+  final String title;
+  final String description;
+  final String type;
+  final String difficulty;
+  final String content;
+  final List<String> answers;
+  final int points;
+  final String? hint;
+  final String? explanation;
+
+  const Exercise({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.type,
+    required this.difficulty,
+    required this.content,
+    required this.answers,
+    required this.points,
+    this.hint,
+    this.explanation,
+  });
+}
+
+class TrainingMethod {
+  final String id;
+  final String name;
+  final String description;
+  final int duration;
+  final String difficulty;
+  final String focus;
+
+  const TrainingMethod({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.duration,
+    required this.difficulty,
+    required this.focus,
+  });
+}

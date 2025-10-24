@@ -1,4 +1,5 @@
 import '../models/lesson_models.dart';
+import 'argumentation_theory.dart';
 
 class LessonsData {
   static List<Lesson> getAllLessons() {
@@ -749,6 +750,113 @@ class LessonsData {
             explanation: 'Presentar limitaciones de manera constructiva muestra honestidad intelectual y puede fortalecer la credibilidad del argumento.',
           ),
         ],
+      ),
+    ];
+  }
+
+  // === TEORÍA DE ARGUMENTACIÓN ===
+  static List<Lesson> _getArgumentationTheoryLessons() {
+    return ArgumentationTheory.argumentationTheory.map((theory) {
+      return Lesson(
+        id: theory.id,
+        title: theory.title,
+        description: theory.description,
+        category: theory.category,
+        difficulty: theory.difficulty,
+        estimatedTime: theory.estimatedTime,
+        xpReward: _getXpReward(theory.difficulty),
+        exercises: _convertTheoryToExercises(theory),
+      );
+    }).toList();
+  }
+
+  // === TÉCNICAS DE REFUTACIÓN ===
+  static List<Lesson> _getRefutationLessons() {
+    return ArgumentationTheory.refutationTechniques.map((theory) {
+      return Lesson(
+        id: theory.id,
+        title: theory.title,
+        description: theory.description,
+        category: theory.category,
+        difficulty: theory.difficulty,
+        estimatedTime: theory.estimatedTime,
+        xpReward: _getXpReward(theory.difficulty),
+        exercises: _convertTheoryToExercises(theory),
+      );
+    }).toList();
+  }
+
+  // === TIPOS DE MOCIONES ===
+  static List<Lesson> _getMotionTypesLessons() {
+    return ArgumentationTheory.motionTypes.map((theory) {
+      return Lesson(
+        id: theory.id,
+        title: theory.title,
+        description: theory.description,
+        category: theory.category,
+        difficulty: theory.difficulty,
+        estimatedTime: theory.estimatedTime,
+        xpReward: _getXpReward(theory.difficulty),
+        exercises: _convertTheoryToExercises(theory),
+      );
+    }).toList();
+  }
+
+  // === TIPOS DE FALACIAS ===
+  static List<Lesson> _getFallacyTypesLessons() {
+    return ArgumentationTheory.fallacyTypes.map((theory) {
+      return Lesson(
+        id: theory.id,
+        title: theory.title,
+        description: theory.description,
+        category: theory.category,
+        difficulty: theory.difficulty,
+        estimatedTime: theory.estimatedTime,
+        xpReward: _getXpReward(theory.difficulty),
+        exercises: _convertTheoryToExercises(theory),
+      );
+    }).toList();
+  }
+
+  // === MÉTODOS AUXILIARES ===
+  
+  static int _getXpReward(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner': return 25;
+      case 'intermediate': return 50;
+      case 'advanced': return 75;
+      default: return 25;
+    }
+  }
+
+  static List<Exercise> _convertTheoryToExercises(TheorySection theory) {
+    return [
+      Exercise(
+        id: '${theory.id}_ex_001',
+        title: 'Comprensión de ${theory.title}',
+        description: 'Ejercicio de comprensión sobre ${theory.title}',
+        type: 'comprehension',
+        difficulty: theory.difficulty,
+        content: '''
+# ${theory.title}
+
+${theory.content}
+
+## Pregunta de Comprensión:
+Basándote en el contenido anterior, responde la siguiente pregunta:
+
+¿Cuál es el concepto principal de ${theory.title}?
+
+## Opciones:
+A) Un concepto básico de argumentación
+B) Una técnica avanzada de debate
+C) Un tipo de falacia común
+D) Una metodología de refutación
+''',
+        answers: ['A'],
+        points: _getXpReward(theory.difficulty),
+        hint: 'Revisa cuidadosamente el contenido teórico para identificar el concepto principal.',
+        explanation: 'El concepto principal se encuentra en la definición y explicación del contenido teórico.',
       ),
     ];
   }
