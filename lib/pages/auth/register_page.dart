@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lottie/lottie.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../../services/auth_service.dart';
+import '../../services/firebase_service.dart';
+import '../../models/university_user.dart';
+import '../../theme/app_theme.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,14 +19,29 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailCtrl = TextEditingController();
   final _passCtrl  = TextEditingController();
   final _pass2Ctrl = TextEditingController();
+  final _displayNameCtrl = TextEditingController();
+  final _universityCtrl = TextEditingController();
+  final _careerCtrl = TextEditingController();
+  final _studentIdCtrl = TextEditingController();
+  final _bioCtrl = TextEditingController();
+  
   bool _loading = false;
   bool _obscure = true;
+  int _selectedSemester = 1;
+  List<String> _selectedInterests = [];
+  
+  final FirebaseService _firebaseService = FirebaseService();
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
     _pass2Ctrl.dispose();
+    _displayNameCtrl.dispose();
+    _universityCtrl.dispose();
+    _careerCtrl.dispose();
+    _studentIdCtrl.dispose();
+    _bioCtrl.dispose();
     super.dispose();
   }
 
@@ -28,7 +49,21 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_form.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
+      // Crear usuario en Firebase Auth
       await AuthService.instance.registerWithEmail(_emailCtrl.text, _passCtrl.text);
+      
+      // Crear perfil universitario
+      await _firebaseService.createUniversityUser(
+        email: _emailCtrl.text.trim(),
+        displayName: _displayNameCtrl.text.trim(),
+        university: _universityCtrl.text.trim(),
+        career: _careerCtrl.text.trim(),
+        studentId: _studentIdCtrl.text.trim(),
+        semester: _selectedSemester,
+        interests: _selectedInterests,
+        bio: _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
+      );
+      
       if (!mounted) return;
       Navigator.of(context).pop(); // vuelve al login; AuthGate abrirá tu app por sesión activa
       ScaffoldMessenger.of(context).showSnackBar(

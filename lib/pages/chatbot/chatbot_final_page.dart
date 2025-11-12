@@ -83,7 +83,10 @@ class _ChatbotFinalPageState extends State<ChatbotFinalPage>
       vsync: this,
     );
     
-    _startTimer();
+    // Solo iniciar timer cuando la página esté visible
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startTimer();
+    });
   }
 
   @override

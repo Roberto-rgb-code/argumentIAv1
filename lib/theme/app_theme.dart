@@ -6,10 +6,12 @@ class AppTheme {
   // Paleta de colores de la identidad corporativa
   static const Color primaryBlue = Color(0xFF0066FF);
   static const Color charcoalBlack = Color(0xFF1A1A1A);
+  static const Color backgroundGrey = Color(0xFFF8F9FA);
   static const Color mintGreen = Color(0xFF00D4AA);
   static const Color brightOrange = Color(0xFFFF6B35);
   static const Color lightGray = Color(0xFFF5F5F7);
   static const Color coralRed = Color(0xFFFF4757);
+  static const Color errorRed = Color(0xFFFF4757);
   static const Color purple = Color(0xFF7C4DFF);
 
   // Gradientes

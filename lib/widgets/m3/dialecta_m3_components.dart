@@ -119,7 +119,7 @@ class DialectaM3Components {
   // === Buttons M3 ===
   static Widget filledButton({
     required String text,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     IconData? icon,
     Color? backgroundColor,
     Color? foregroundColor,

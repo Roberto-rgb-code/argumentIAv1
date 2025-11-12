@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../services/auth_service.dart';
-import 'register_page.dart';
-import 'university_register_page.dart';
+import '../../theme/app_theme.dart';
+import 'register_page_new.dart';
 import 'reset_password_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -12,17 +13,39 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final _form = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _loading = false;
   bool _obscure = true;
+  late AnimationController _animationController;
+
+  // Método para cargar la animación Lottie
+  Future<void> _loadLottieAnimation() async {
+    try {
+      // Simular carga de la animación
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (e) {
+      // Si hay error, lanzar excepción para que FutureBuilder lo maneje
+      throw Exception('Error al cargar animación: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -60,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: const Text(
-          'Argumenta • Iniciar sesión',
+          'ArgumentIA • Iniciar sesión',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         elevation: 0,
@@ -106,10 +129,94 @@ class _LoginPageState extends State<LoginPage> {
                             color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.school_rounded,
-                            size: 48,
-                            color: Colors.white,
+                          child: SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: Lottie.network(
+                              'https://lottie.host/739368b9-9d98-466e-90ac-19e448d2f3d5/hPX0ns4DBQ.lottie',
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.contain,
+                              repeat: true,
+                              animate: true,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback a animación personalizada si hay error
+                                return AnimatedBuilder(
+                                  animation: _animationController,
+                                  builder: (context, child) {
+                                    return Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Círculo de fondo animado con pulso
+                                        Transform.scale(
+                                          scale: 1.0 + (0.4 * _animationController.value),
+                                          child: Container(
+                                            width: 60,
+                                            height: 60,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              gradient: RadialGradient(
+                                                colors: [
+                                                  Colors.white.withOpacity(0.4),
+                                                  Colors.white.withOpacity(0.1),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        // Icono principal con animación de pulso
+                                        Transform.scale(
+                                          scale: 1.0 + (0.2 * _animationController.value),
+                                          child: Transform.rotate(
+                                            angle: _animationController.value * 0.3,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.white.withOpacity(0.9),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.white.withOpacity(0.3),
+                                                    blurRadius: 10,
+                                                    spreadRadius: 2,
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Icon(
+                                                Icons.school_rounded,
+                                                size: 32,
+                                                color: AppTheme.primaryBlue,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        // Partículas flotantes
+                                        ...List.generate(3, (index) {
+                                          final offset = (index * 120.0) + (_animationController.value * 360);
+                                          return Transform.translate(
+                                            offset: Offset(
+                                              (20 * (index + 1)) * (0.5 + 0.5 * _animationController.value),
+                                              (15 * (index + 1)) * (0.5 + 0.5 * _animationController.value),
+                                            ),
+                                            child: Transform.rotate(
+                                              angle: offset * (3.14159 / 180),
+                                              child: Container(
+                                                width: 4,
+                                                height: 4,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.white.withOpacity(0.8),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -376,100 +483,48 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 20),
 
-                  // Registro
-                  Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: const Color(0xFF6C5CE7).withOpacity(0.2),
-                            width: 2,
+                  // Registro simple
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFF6C5CE7).withOpacity(0.2),
+                        width: 2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '¿No tienes cuenta?',
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '¿No tienes cuenta?',
-                              style: TextStyle(
-                                color: Colors.grey[700],
-                                fontWeight: FontWeight.w600,
-                              ),
+                        const SizedBox(width: 4),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const RegisterPageNew()),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFF6C5CE7),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          child: const Text(
+                            'Crear cuenta gratis',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
                             ),
-                            const SizedBox(width: 4),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const RegisterPage()),
-                                );
-                              },
-                              style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF6C5CE7),
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                              ),
-                              child: const Text(
-                                'Crear cuenta gratis',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF6C5CE7).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: const Color(0xFF6C5CE7).withOpacity(0.3),
-                            width: 2,
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Text(
-                              '¿Eres estudiante universitario?',
-                              style: TextStyle(
-                                color: Colors.grey[700],
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const UniversityRegisterPage()),
-                                );
-                              },
-                              icon: const Icon(Icons.school, size: 18),
-                              label: const Text(
-                                'Registro Universitario',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6C5CE7),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   )
                       .animate()
                       .fadeIn(duration: 600.ms, delay: 400.ms)

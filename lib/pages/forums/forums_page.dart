@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../models/forum_models.dart';
+import '../../services/firebase_service.dart';
 import 'create_debate_page.dart';
 import 'debate_detail_page.dart';
 
@@ -15,8 +16,21 @@ class ForumsPage extends StatefulWidget {
 class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
   late TabController _tabController;
   DebateCategory _selectedCategory = DebateCategory.politica;
+  final FirebaseService _firebaseService = FirebaseService();
 
-  // Datos de ejemplo para los debates
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // Datos de ejemplo para los debates (temporal)
   final List<DebateTopic> _debates = [
     DebateTopic(
       id: '1',
@@ -44,71 +58,7 @@ class _ForumsPageState extends State<ForumsPage> with TickerProviderStateMixin {
       tags: ['clima', 'sostenibilidad', 'medio ambiente'],
       isActive: true,
     ),
-    DebateTopic(
-      id: '3',
-      title: 'La educación online es mejor que la presencial',
-      description: 'Debatamos sobre las ventajas y desventajas de la educación virtual vs presencial.',
-      category: 'educacion',
-      votes: 88,
-      comments: 28,
-      createdAt: DateTime.now().subtract(const Duration(hours: 6)),
-      authorId: 'user3',
-      authorName: 'María Rodríguez',
-      tags: ['educación', 'tecnología', 'aprendizaje'],
-      isActive: true,
-    ),
-    DebateTopic(
-      id: '4',
-      title: 'La globalización es beneficiosa para todos',
-      description: 'Evaluemos el impacto de la globalización en las economías mundiales y las sociedades.',
-      category: 'economia',
-      votes: 75,
-      comments: 22,
-      createdAt: DateTime.now().subtract(const Duration(hours: 8)),
-      authorId: 'user4',
-      authorName: 'José Martínez',
-      tags: ['economía', 'globalización', 'comercio'],
-      isActive: true,
-    ),
-    DebateTopic(
-      id: '5',
-      title: 'La energía nuclear es necesaria para el futuro',
-      description: 'Discutamos el papel de la energía nuclear en la transición energética.',
-      category: 'medioAmbiente',
-      votes: 62,
-      comments: 18,
-      createdAt: DateTime.now().subtract(const Duration(hours: 10)),
-      authorId: 'user5',
-      authorName: 'Laura Sánchez',
-      tags: ['energía', 'nuclear', 'sostenibilidad'],
-      isActive: true,
-    ),
-    DebateTopic(
-      id: '6',
-      title: 'La exploración espacial es una pérdida de recursos',
-      description: 'Analicemos si la exploración espacial justifica la inversión económica.',
-      category: 'tecnologia',
-      votes: 50,
-      comments: 15,
-      createdAt: DateTime.now().subtract(const Duration(hours: 12)),
-      authorId: 'user6',
-      authorName: 'Roberto Díaz',
-      tags: ['espacio', 'ciencia', 'recursos'],
-      isActive: true,
-    ),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   List<DebateTopic> get _filteredDebates {
     if (_selectedCategory == DebateCategory.politica) {

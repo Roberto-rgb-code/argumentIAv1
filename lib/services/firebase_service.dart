@@ -17,8 +17,29 @@ class FirebaseService {
 
   // === FOROS ===
   
-  // Crear nuevo debate
+  // Verificar si el usuario es master
+  Future<bool> _isMasterUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
+      
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      if (!doc.exists) return false;
+      
+      final data = doc.data()!;
+      return data['isMaster'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  // Crear nuevo debate (solo masters)
   Future<String> createDebate(DebateTopic debate) async {
+    // Verificar permisos de master
+    if (!await _isMasterUser()) {
+      throw Exception('Solo los usuarios master pueden crear debates');
+    }
+    
     try {
       final docRef = await _firestore.collection('debates').add({
         'title': debate.title,
@@ -150,21 +171,32 @@ class FirebaseService {
 
   // === EVENTOS ===
 
-  // Crear evento
-  Future<String> createEvent(Event event) async {
+  // Crear evento (solo masters)
+  Future<String> createEvent(DebateEvent event) async {
+    // Verificar permisos de master
+    if (!await _isMasterUser()) {
+      throw Exception('Solo los usuarios master pueden crear eventos');
+    }
+    
     try {
       final docRef = await _firestore.collection('events').add({
         'title': event.title,
         'description': event.description,
-        'date': event.date.toIso8601String(),
+        'startDate': event.startDate.toIso8601String(),
+        'endDate': event.endDate.toIso8601String(),
         'location': event.location,
+        'organizer': event.organizer,
         'maxParticipants': event.maxParticipants,
-        'organizerId': event.organizerId,
-        'organizerName': event.organizerName,
-        'participants': [],
-        'prizes': event.prizes.map((p) => p.toMap()).toList(),
+        'currentParticipants': event.currentParticipants,
+        'category': event.category,
+        'topics': event.topics,
+        'isOnline': event.isOnline,
+        'meetingLink': event.meetingLink,
+        'price': event.price,
+        'status': event.status,
+        'registeredUsers': event.registeredUsers,
+        'prizes': event.prizes,
         'rules': event.rules,
-        'status': event.status.name,
         'createdAt': FieldValue.serverTimestamp(),
       });
       return docRef.id;
@@ -174,37 +206,36 @@ class FirebaseService {
   }
 
   // Obtener eventos
-  Stream<List<Event>> getEvents({EventStatus? status}) {
+  Stream<List<DebateEvent>> getEvents({String? status}) {
     Query query = _firestore.collection('events')
-        .orderBy('date', descending: false);
+        .orderBy('startDate', descending: false);
 
     if (status != null) {
-      query = query.where('status', isEqualTo: status.name);
+      query = query.where('status', isEqualTo: status);
     }
 
     return query.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        return Event(
+        return DebateEvent(
           id: doc.id,
           title: data['title'] ?? '',
           description: data['description'] ?? '',
-          date: DateTime.parse(data['date'] ?? DateTime.now().toIso8601String()),
+          startDate: DateTime.parse(data['startDate'] ?? DateTime.now().toIso8601String()),
+          endDate: DateTime.parse(data['endDate'] ?? DateTime.now().toIso8601String()),
           location: data['location'] ?? '',
+          organizer: data['organizer'] ?? '',
           maxParticipants: data['maxParticipants'] ?? 0,
-          organizerId: data['organizerId'] ?? '',
-          organizerName: data['organizerName'] ?? '',
-          participants: List<Participant>.from(
-            (data['participants'] ?? []).map((p) => Participant.fromMap(p))
-          ),
-          prizes: List<Prize>.from(
-            (data['prizes'] ?? []).map((p) => Prize.fromMap(p))
-          ),
-          rules: List<String>.from(data['rules'] ?? []),
-          status: EventStatus.values.firstWhere(
-            (s) => s.name == data['status'],
-            orElse: () => EventStatus.upcoming,
-          ),
+          currentParticipants: data['currentParticipants'] ?? 0,
+          category: data['category'] ?? '',
+          topics: List<String>.from(data['topics'] ?? []),
+          isOnline: data['isOnline'] ?? false,
+          meetingLink: data['meetingLink'],
+          price: data['price']?.toDouble(),
+          status: data['status'] ?? 'upcoming',
+          registeredUsers: List<String>.from(data['registeredUsers'] ?? []),
+          prizes: data['prizes'],
+          rules: data['rules'],
         );
       }).toList();
     });
@@ -518,6 +549,52 @@ class FirebaseService {
     } catch (e) {
       throw Exception('Error al eliminar usuario: $e');
     }
+  }
+
+  // === ADMINISTRACIÓN ===
+  
+  // Hacer usuario master (solo para administradores)
+  Future<void> makeUserMaster(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'isMaster': true,
+        'masterSince': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error al hacer usuario master: $e');
+    }
+  }
+  
+  // Quitar permisos de master
+  Future<void> removeMasterUser(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'isMaster': false,
+        'masterRemovedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error al quitar permisos de master: $e');
+    }
+  }
+  
+  // Obtener lista de usuarios master
+  Stream<List<Map<String, dynamic>>> getMasterUsers() {
+    return _firestore
+        .collection('users')
+        .where('isMaster', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'displayName': data['displayName'] ?? 'Sin nombre',
+          'email': data['email'] ?? '',
+          'university': data['university'] ?? '',
+          'masterSince': data['masterSince'],
+        };
+      }).toList();
+    });
   }
 }
 

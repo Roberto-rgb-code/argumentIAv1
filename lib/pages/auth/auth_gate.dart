@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../services/auth_service.dart';
-import 'login_page.dart';
+import 'login_page_simple.dart';
 
 class AuthGate extends StatelessWidget {
   final Widget shell;
@@ -14,17 +13,23 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: AuthService.instance.authState,
       builder: (context, snap) {
+        // Si está cargando, mostrar loading simple
         if (snap.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
         }
-        if (snap.data == null) {
-          return const LoginPage();
+        
+        // Si hay usuario autenticado, mostrar la app
+        if (snap.hasData && snap.data != null) {
+          return shell;
         }
-        return shell;
+        
+        // Si no hay usuario, mostrar login
+        return const LoginPageSimple();
       },
-    )
-        .animate()
-        .fadeIn(duration: 250.ms)
-        .slide(begin: const Offset(0, .03));
+    );
   }
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'firebase_options.dart';
 
 import 'theme/app_theme.dart';
 
 // Páginas existentes
+import 'pages/splash/splash_page.dart';
 import 'pages/home_page.dart' as home;
 import 'pages/chatbot/chatbot_final_page.dart' as chat;
 import 'pages/forums/forums_page.dart' as forums;
@@ -19,9 +21,11 @@ import 'pages/auth/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
   Animate.restartOnHotReload = true;
   runApp(const ArgumentaApp());
 }
@@ -37,11 +41,11 @@ class ArgumentaApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
-          title: 'Dialecta',
+          title: 'ArgumentIA',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
+          theme: AppThemeM3.lightTheme,
           // Muestra login/registro si no hay sesión; si hay sesión, muestra tu shell.
-          home: const AuthGate(shell: _Shell()),
+                 home: const SplashPage(),
         );
       },
     );
@@ -68,11 +72,8 @@ class _ShellState extends State<_Shell> {
 
   @override
   Widget build(BuildContext context) {
-    final content = IndexedStack(
-      key: ValueKey(_index),
-      index: _index,
-      children: _tabs,
-    );
+    // Solo cargar la página actual para mejor rendimiento
+    final content = _tabs[_index];
 
     return Scaffold(
       body: AnimatedSwitcher(

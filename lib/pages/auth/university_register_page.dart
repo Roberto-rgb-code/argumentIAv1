@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../widgets/m3/dialecta_m3_components.dart';
 import '../../theme/app_theme.dart';
@@ -17,7 +18,7 @@ class UniversityRegisterPage extends StatefulWidget {
 class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _firebaseService = FirebaseService();
-  final _authService = AuthService();
+  final _authService = AuthService.instance;
 
   // Controladores
   final _emailController = TextEditingController();
@@ -26,9 +27,7 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
   final _displayNameController = TextEditingController();
   final _studentIdController = TextEditingController();
   final _bioController = TextEditingController();
-  final _linkedinController = TextEditingController();
-  final _githubController = TextEditingController();
-  final _profileImageController = TextEditingController();
+  // Eliminados: LinkedIn, GitHub, ProfileImage
 
   // Variables de estado
   String _selectedUniversity = '';
@@ -47,9 +46,6 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
     _displayNameController.dispose();
     _studentIdController.dispose();
     _bioController.dispose();
-    _linkedinController.dispose();
-    _githubController.dispose();
-    _profileImageController.dispose();
     super.dispose();
   }
 
@@ -128,13 +124,7 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
           ),
         ),
         const SizedBox(height: 8),
-        DialectaM3Components.textField(
-          label: 'URL de imagen de perfil',
-          hint: 'https://ejemplo.com/mi-foto.jpg',
-          controller: _profileImageController,
-          keyboardType: TextInputType.url,
-          helperText: 'Puedes usar servicios como Imgur, Gravatar, etc.',
-        ),
+        // Imagen de perfil eliminada
       ],
     );
   }
@@ -240,26 +230,17 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
         ),
         const SizedBox(height: 16),
 
-        // Universidad
-        DropdownButtonFormField<String>(
-          value: _selectedUniversity.isEmpty ? null : _selectedUniversity,
-          decoration: InputDecoration(
-            labelText: 'Universidad',
-            hintText: 'Selecciona tu universidad',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-          items: UniversityUser.availableUniversities.map((university) {
-            return DropdownMenuItem(
-              value: university,
-              child: Text(university),
-            );
-          }).toList(),
-          onChanged: (value) => setState(() => _selectedUniversity = value ?? ''),
-          validator: (value) => value?.isEmpty == true ? 'Selecciona tu universidad' : null,
+        // Universidad - Campo libre
+        DialectaM3Components.textField(
+          label: 'Universidad',
+          hint: 'Ingresa el nombre de tu universidad',
+          controller: TextEditingController(text: _selectedUniversity),
+          onChanged: (value) => setState(() => _selectedUniversity = value),
+          validator: (value) {
+            if (value?.isEmpty == true) return 'La universidad es requerida';
+            if (value!.length < 3) return 'Mínimo 3 caracteres';
+            return null;
+          },
         ),
         const SizedBox(height: 16),
 
@@ -419,24 +400,7 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
           controller: _bioController,
           maxLines: 3,
         ),
-        const SizedBox(height: 16),
-
-        // LinkedIn
-        DialectaM3Components.textField(
-          label: 'LinkedIn (opcional)',
-          hint: 'https://linkedin.com/in/tu-perfil',
-          controller: _linkedinController,
-          keyboardType: TextInputType.url,
-        ),
-        const SizedBox(height: 16),
-
-        // GitHub
-        DialectaM3Components.textField(
-          label: 'GitHub (opcional)',
-          hint: 'https://github.com/tu-usuario',
-          controller: _githubController,
-          keyboardType: TextInputType.url,
-        ),
+        // Campos de URL eliminados
       ],
     );
   }
@@ -446,7 +410,7 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
       width: double.infinity,
       child: DialectaM3Components.filledButton(
         text: _isLoading ? 'Creando cuenta...' : 'Crear cuenta universitaria',
-        onPressed: _isLoading ? null : _registerUser,
+        onPressed: _isLoading ? null : () => _registerUser(),
         icon: _isLoading ? null : Icons.person_add_rounded,
       ),
     );
@@ -471,7 +435,7 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
 
     try {
       // Crear usuario en Firebase Auth
-      await _authService.registerWithEmailAndPassword(
+      await _authService.registerWithEmail(
         _emailController.text.trim(),
         _passwordController.text,
       );
@@ -486,14 +450,9 @@ class _UniversityRegisterPageState extends State<UniversityRegisterPage> {
         semester: _selectedSemester,
         interests: _selectedInterests,
         bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
-        linkedinUrl: _linkedinController.text.trim().isEmpty ? null : _linkedinController.text.trim(),
-        githubUrl: _githubController.text.trim().isEmpty ? null : _githubController.text.trim(),
       );
 
-      // Actualizar imagen de perfil si se proporcionó URL
-      if (_profileImageController.text.trim().isNotEmpty) {
-        await _firebaseService.updateProfileImageUrl(_profileImageController.text.trim());
-      }
+      // Imagen de perfil eliminada
 
       // Navegar al home
       if (mounted) {

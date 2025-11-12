@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../models/event_models.dart';
+import '../../services/firebase_service.dart';
 import 'event_detail_page.dart';
 import 'create_event_page.dart';
 
@@ -18,8 +19,9 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
+  final FirebaseService _firebaseService = FirebaseService();
 
-  // Eventos de ejemplo
+  // Eventos de ejemplo (temporal)
   final List<DebateEvent> _events = [
     DebateEvent(
       id: '1',
@@ -50,58 +52,6 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
       topics: ['Argumentación', 'AREAL', 'Pensamiento Crítico'],
       isOnline: true,
       meetingLink: 'https://meet.google.com/abc-defg-hij',
-      status: 'upcoming',
-    ),
-    DebateEvent(
-      id: '3',
-      title: 'Torneo Nacional de Debate 2024',
-      description: 'El torneo más importante del año. Participa en competencias de debate en múltiples categorías y demuestra tus habilidades argumentativas.',
-      startDate: DateTime.now().add(const Duration(days: 7)),
-      endDate: DateTime.now().add(const Duration(days: 7, hours: 8)),
-      location: 'Centro de Convenciones Guadalajara',
-      organizer: 'Federación Mexicana de Debate',
-      maxParticipants: 200,
-      currentParticipants: 156,
-      category: 'torneo',
-      topics: ['Competencia', 'Torneo', 'Nacional'],
-      isOnline: false,
-      price: 150.0,
-      status: 'upcoming',
-      prizes: {
-        'primerLugar': 'Trofeo + 10,000 MXN',
-        'segundoLugar': 'Medalla + 5,000 MXN',
-        'tercerLugar': 'Certificado + 2,500 MXN',
-      },
-    ),
-    DebateEvent(
-      id: '4',
-      title: 'Conferencia: Inteligencia Artificial y Sociedad',
-      description: 'Una conferencia magistral sobre el impacto de la IA en la sociedad moderna, seguida de un debate abierto con el público.',
-      startDate: DateTime.now().add(const Duration(days: 3, hours: 18)),
-      endDate: DateTime.now().add(const Duration(days: 3, hours: 20)),
-      location: 'Auditorio Telmex',
-      organizer: 'Tecnológico de Monterrey',
-      maxParticipants: 300,
-      currentParticipants: 287,
-      category: 'conferencia',
-      topics: ['IA', 'Sociedad', 'Tecnología'],
-      isOnline: false,
-      status: 'upcoming',
-    ),
-    DebateEvent(
-      id: '5',
-      title: 'Debate sobre la renta básica universal',
-      description: 'Un debate estructurado sobre los pros y contras de implementar una renta básica universal en México.',
-      startDate: DateTime.now().add(const Duration(days: 5, hours: 16)),
-      endDate: DateTime.now().add(const Duration(days: 5, hours: 18)),
-      location: 'Online',
-      organizer: 'Debate México',
-      maxParticipants: 40,
-      currentParticipants: 25,
-      category: 'debatePublico',
-      topics: ['Economía', 'Política Social', 'Renta Básica'],
-      isOnline: true,
-      meetingLink: 'https://zoom.us/j/123456789',
       status: 'upcoming',
     ),
   ];
